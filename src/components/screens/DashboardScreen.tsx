@@ -11,14 +11,9 @@ import { Badge, VerificationBadge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/context/authStore";
 import { useSafetyCenter } from "@/context/SafetyProvider";
+import { ARCADE_GAMES } from "@/data/arcadeContent";
 import { MOCK_MATCHES } from "@/data/mockMatches";
 import { getVibeTag } from "@/data/profileOptions";
-
-const PHASE_TWO_GAMES = [
-  { emoji: "🎯", name: "Trivia Toss", detail: "60-second quickfire" },
-  { emoji: "🧩", name: "Emoji Riddle", detail: "Guess the movie" },
-  { emoji: "🎭", name: "Two Truths One Lie", detail: "Spot the fib" },
-];
 
 export function DashboardScreen() {
   const user = useAuthStore((state) => state.user);
@@ -146,26 +141,28 @@ export function DashboardScreen() {
         <section className="mt-6 rounded-3xl border border-accent-purple/25 bg-gradient-to-br from-accent-purple/12 via-white/5 to-rose/10 p-5 backdrop-blur-md">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <Badge tone="purple" icon={Gamepad2}>
-                Unlocks in Phase 2
+              <Badge tone="emerald" icon={Gamepad2}>
+                Playable now
               </Badge>
               <h2 className="mt-3 text-lg font-semibold text-white">Arcade cabinets in the lobby</h2>
               <p className="mt-1 max-w-md text-xs leading-relaxed text-muted">
-                Your match-to-conversation flow is live. Playable rounds with live scoring arrive in Phase 2 — the lobby
-                is already wired behind every &quot;Break the Ice 🎮&quot; button.
+                Hit &quot;Break the Ice 🎮&quot; on any match card, play a quick round, and the result lands in your chat
+                as a one-tap opener.
               </p>
             </div>
             <div className="grid w-full max-w-xs gap-2">
-              {PHASE_TWO_GAMES.map((game) => (
+              {ARCADE_GAMES.map((game) => (
                 <div
-                  key={game.name}
+                  key={game.id}
                   className="flex items-center justify-between rounded-2xl border border-white/10 bg-ink/50 px-3.5 py-2.5 text-xs"
                 >
                   <span className="flex items-center gap-2 text-white">
                     <span>{game.emoji}</span>
                     {game.name}
                   </span>
-                  <span className="text-[10px] uppercase tracking-wide text-muted">{game.detail}</span>
+                  <span className="text-[10px] uppercase tracking-wide text-muted">
+                    {game.durationSeconds}s · {game.rounds} {game.rounds === 1 ? "round" : "rounds"}
+                  </span>
                 </div>
               ))}
             </div>

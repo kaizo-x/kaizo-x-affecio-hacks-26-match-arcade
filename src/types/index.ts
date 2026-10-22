@@ -129,3 +129,69 @@ export interface SafetyTip {
   title: string;
   body: string;
 }
+
+/* ------------------------------------------------------------------ */
+/* Arcade game engine                                                  */
+/* ------------------------------------------------------------------ */
+
+export type ArcadeGameId = "hot-take-swipe" | "co-op-canvas";
+
+export interface ArcadeGame {
+  id: ArcadeGameId;
+  name: string;
+  emoji: string;
+  tagline: string;
+  howToPlay: string;
+  durationSeconds: number;
+  rounds: number;
+  accent: "rose" | "purple" | "emerald";
+}
+
+export type HotTakeChoice = "agree" | "disagree";
+
+export interface HotTake {
+  id: string;
+  prompt: string;
+  agreeLabel: string;
+  disagreeLabel: string;
+  agreeEmoji: string;
+  disagreeEmoji: string;
+  /** The other player's stance in this mock multiplayer round. */
+  partnerStance: HotTakeChoice;
+}
+
+export interface HotTakeVerdict {
+  take: HotTake;
+  self: HotTakeChoice;
+  partner: HotTakeChoice;
+  agreed: boolean;
+}
+
+export interface CanvasPrompt {
+  id: string;
+  subject: string;
+  emoji: string;
+  hint: string;
+  /** Copy used for the outcome chip once the round ends. */
+  completionChip: string;
+}
+
+export type OutcomeTone = "match" | "clash" | "canvas";
+
+export interface OutcomeChip {
+  id: string;
+  gameId: ArcadeGameId;
+  emoji: string;
+  label: string;
+  message: string;
+  tone: OutcomeTone;
+}
+
+export interface ChatMessage {
+  id: string;
+  author: "me" | "match";
+  text: string;
+  sentAt: string;
+  chipId?: string;
+}
+

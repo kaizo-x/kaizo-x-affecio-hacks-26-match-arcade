@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { BadgeCheck, Flag, Gamepad2, Heart, MapPin, Send, Sparkles, X } from "lucide-react";
-import { ArcadeLobbyModal } from "@/components/match/ArcadeLobbyModal";
+import { BadgeCheck, Flag, Gamepad2, Heart, MapPin, MessageCircle, Sparkles, X } from "lucide-react";
+import { ArcadeModal } from "@/components/ArcadeModal";
+import { ChatThread } from "@/components/ChatThread";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
 import { useSafetyCenter } from "@/context/SafetyProvider";
 import { useToast } from "@/context/ToastProvider";
 import { getVibeTag } from "@/data/profileOptions";
 import { cn, formatDistance } from "@/lib/utils";
-import type { MatchProfile } from "@/types";
+import type { MatchProfile, OutcomeChip } from "@/types";
 
 type Decision = "liked" | "passed" | null;
 
@@ -20,9 +21,10 @@ export interface ProfileCardProps {
 
 export function ProfileCard({ profile }: ProfileCardProps) {
   const [decision, setDecision] = useState<Decision>(null);
-  const [messages, setMessages] = useState<string[]>([]);
-  const [isLobbyOpen, setLobbyOpen] = useState(false);
   const [photoFailed, setPhotoFailed] = useState(false);
+  const [isArcadeOpen, setArcadeOpen] = useState(false);
+  const [isChatOpen, setChatOpen] = useState(false);
+  const [chips, setChips] = useState<OutcomeChip[]>([]);
   const { openReport } = useSafetyCenter();
   const toast = useToast();
 
@@ -37,10 +39,16 @@ export function ProfileCard({ profile }: ProfileCardProps) {
     setDecision((current) => (current === "passed" ? null : "passed"));
   };
 
-  const handleOpener = (message: string) => {
-    setMessages((current) => [...current, message]);
-    setDecision("liked");
-    toast.success(`Opener sent to ${profile.name}`, "Your arcade invite is on its way. Phase 2 games unlock next.");
+  /** Fresh ids per round so identical chips stay tappable after a rematch. */
+  const handleChips = (newChips: OutcomeChip[]) => {
+    const stamped = newChips.map((chip, index) => ({ ...chip, id: `${chip.id}_${Date.now()}_${index}` }));
+    setChips((current) => [...current, ...stamped]);
+    setArcadeOpen(false);
+    setChatOpen(true);
+    toast.success(
+      "Round finished! 🎮",
+      `${stamped.length} icebreaker ${stamped.length === 1 ? "chip" : "chips"} added to your chat with ${profile.name}.`
+    );
   };
 
   return (
@@ -70,8 +78,21 @@ export function ProfileCard({ profile }: ProfileCardProps) {
             ) : (
               <Badge tone="glass">Unverified</Badge>
             )}
-            {decision === "liked" ? <Badge tone="rose" icon={Heart}>You liked</Badge> : null}
-            {decision === "passed" ? <Badge tone="glass" icon={X}>Passed</Badge> : null}
+            {decision === "liked" ? (
+              <Badge tone="rose" icon={Heart}>
+                You liked
+              </Badge>
+            ) : null}
+            {decision === "passed" ? (
+              <Badge tone="glass" icon={X}>
+                Passed
+              </Badge>
+            ) : null}
+            {chips.length > 0 ? (
+              <Badge tone="purple" icon={Sparkles}>
+                {chips.length} icebreaker {chips.length === 1 ? "chip" : "chips"}
+              </Badge>
+            ) : null}
           </div>
           <Badge tone="purple" icon={Sparkles}>
             {profile.matchPercent}% match
@@ -107,31 +128,6 @@ export function ProfileCard({ profile }: ProfileCardProps) {
 
         <p className="text-xs leading-relaxed text-muted">{profile.bio}</p>
 
-        <AnimatePresence>
-          {messages.length > 0 ? (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="space-y-2 overflow-hidden rounded-2xl border border-white/10 bg-ink-deep/60 p-3"
-            >
-              <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted">
-                <Send className="h-3 w-3" />
-                Conversation preview
-              </p>
-              {messages.map((message, index) => (
-                <div
-                  key={`${message}-${index}`}
-                  className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-sm bg-gradient-to-r from-rose/80 to-accent-purple/80 px-3 py-2 text-xs leading-relaxed text-white"
-                >
-                  {message}
-                </div>
-              ))}
-              <p className="text-[10px] text-muted">Waiting for {profile.name} to reply…</p>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
-
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -147,12 +143,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
             <X className="h-4 w-4" />
           </button>
 
-          <Button
-            onClick={() => setLobbyOpen(true)}
-            icon={Gamepad2}
-            className="h-11 flex-1 animate-none"
-            fullWidth
-          >
+          <Button onClick={() => setArcadeOpen(true)} icon={Gamepad2} className="h-11 flex-1 animate-none" fullWidth>
             Break the Ice 🎮
           </Button>
 
@@ -171,22 +162,42 @@ export function ProfileCard({ profile }: ProfileCardProps) {
           </button>
         </div>
 
-        <button
-          type="button"
-          onClick={() => openReport({ id: profile.id, name: profile.name })}
-          className="flex w-full items-center justify-center gap-1.5 rounded-xl py-1.5 text-[11px] text-muted transition hover:bg-rose/10 hover:text-rose-soft"
-        >
-          <Flag className="h-3 w-3" />
-          Report or block {profile.name}
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setChatOpen(true)}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl py-1.5 text-[11px] text-muted transition hover:bg-white/10 hover:text-white"
+          >
+            <MessageCircle className="h-3 w-3" />
+            {chips.length > 0 ? `Open chat · ${chips.length} new` : `Chat with ${profile.name}`}
+          </button>
+          <button
+            type="button"
+            onClick={() => openReport({ id: profile.id, name: profile.name })}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl py-1.5 text-[11px] text-muted transition hover:bg-rose/10 hover:text-rose-soft"
+          >
+            <Flag className="h-3 w-3" />
+            Report or block
+          </button>
+        </div>
       </div>
 
-      <ArcadeLobbyModal
-        open={isLobbyOpen}
-        onClose={() => setLobbyOpen(false)}
-        profile={profile}
-        onSendOpener={handleOpener}
+      <ArcadeModal
+        open={isArcadeOpen}
+        onClose={() => setArcadeOpen(false)}
+        partner={profile}
+        onChips={handleChips}
       />
+
+      <Modal
+        open={isChatOpen}
+        onClose={() => setChatOpen(false)}
+        size="lg"
+        title={`Chat with ${profile.name}`}
+        description="Tap an icebreaker chip to send it instantly — or type your own."
+      >
+        <ChatThread partner={profile} chips={chips} />
+      </Modal>
     </article>
   );
 }
