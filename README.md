@@ -2,8 +2,8 @@
 
 > **Hackathon:** AFFECIO HACKS '26  
 > **Track:** Track 2 — From Match to Conversation  
-> **Team Name:** [Your Team Name]  
-> **Team Members:** [Member 1], [Member 2], [Member 3]  
+> **Team Name:** kaizo-x  
+> **Team Members:** Sayali Pagare
 
 ---
 
