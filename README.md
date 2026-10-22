@@ -22,6 +22,15 @@ In our first commit, we built the foundational architecture, design system, user
 - **Privacy & Safety Control Panel:** Created a dedicated safety drawer featuring incognito mode toggles, selfie verification triggers, dating safety tips, and a reusable Block/Report modal.
 - **Dashboard Preview:** Deployed the active match layout complete with "Break the Ice 🎮" action triggers.
 
+
+### 🔹 Commit 2 (`Phase 2: Core Game Engine & Chat Injection`)
+- **Arcade Launcher Modal (`ArcadeModal.tsx`):** Built a central game launcher modal triggered directly from match profile cards.
+- **Hot Take Swipe Engine (`HotTakeSwipe.tsx`):** Implemented a 15-second opinion matching module that compares player choices on controversial takes and outputs alignment results.
+- **HTML5 Co-Op Canvas (`CoOpCanvas.tsx`):** Developed an interactive 30-second shared drawing board with color palette controls, canvas clearing, and prompt generators.
+- **Dynamic Chat Thread (`ChatThread.tsx`):** Built an interactive chat interface that automatically injects post-game outcome chips at the top of the thread as clickable one-tap icebreakers.
+- **Structured Content Store (`arcadeContent.ts`):** Created modular datasets for hot takes and drawing prompts to ensure variety across game sessions.
+
+
 ---
 
 ## ✨ Core Features
